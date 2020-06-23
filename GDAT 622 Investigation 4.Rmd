@@ -1,0 +1,130 @@
+---
+title: "GDAT 622 Investigation 4"
+author: "Pavan Hothi"
+date: "6/22/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+{
+  c("conflicted",   
+    "data.table",    
+    "dplyr",         
+    "drat",          
+    "dtplyr",       
+    "here",
+    "igraph",       
+    "igraphdata",    
+    "intergraph",    
+    "NetData",      
+    "statnet"        
+  ) -> package_names
+  
+  for (package_name in package_names) {
+    if (!is.element(package_name, installed.packages()[, 1])) {
+      install.packages(package_name,
+                       repos = "http://cran.mtu.edu/")
+    }
+    library(
+      package_name,
+      character.only = TRUE,
+      quietly = TRUE,
+      verbose = FALSE
+    )
+  }
+  rm(list = c("package_name", "package_names"))
+  
+  
+  if (!is.element("networkdata", installed.packages()[, 1])) {
+    addRepo("schochastics")
+    install.packages("networkdata")
+  }
+  library(
+    "networkdata",
+    character.only = TRUE,
+    quietly = TRUE,
+    verbose = FALSE
+  )
+}
+
+set_here()
+
+
+options(show.signif.stars = FALSE)
+options(digits = 4)
+```
+
+
+
+```{r}
+read.csv("C:/Users/pavan/Documents/Emotions.csv") -> emotions_df
+
+```
+
+
+
+```{r}
+head(emotions_df)
+str(emotions_df)
+
+select(emotions_df[1:10000,], 19, 1:18)  -> emotions
+
+```
+
+
+
+```{r, adj mat}
+colnames(emotions) -> emotions_names
+matrix(0,
+       nrow = (20),
+       ncol = (20)
+       ) -> emotions_mat
+emotions_mat
+
+
+```
+
+
+
+```{r, graph}
+
+graph.data.frame(emotions) -> emotions_graph
+emotions_graph
+
+
+```
+
+
+
+```{r, network}
+asNetwork(emotions_graph) -> emotions_net
+
+plot(emotions_net, displaylabels = TRUE, boxed.labels = FALSE,
+     label.cex = 0.75, pad = 1, main = "Emotions Network")
+
+```
+
+
+
+```{r, centrality}
+centr_betw(emotions_graph)$centralization -> emotions_graph_betw
+emotions_graph_betw
+
+centr_degree(emotions_graph)$centralization -> emotions_graph_deg
+emotions_graph_deg
+```
+
+
+
+```{r, ergm}
+ergm(emotions_net ~ edges) -> emotions_ergm
+summary(emotions_ergm)
+anova(emotions_ergm)
+
+```
+
+
